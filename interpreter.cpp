@@ -90,30 +90,35 @@ class_t Instruction::get_class(void) const {
     return static_cast<class_t>(opcode & 0x07);
 }
 
-class InterpreterException : public std::exception {
+class InterpreterException : public std::runtime_error {
     public:
         const Instruction *instruction;
-        InterpreterException(const Instruction *i) : instruction(i) {}
+        InterpreterException(const Instruction *i, const char *message)
+            : runtime_error(message), instruction(i) {}
 };
 
 class IllegalInstruction : public InterpreterException {
     public:
-        IllegalInstruction(const Instruction *i) : InterpreterException(i) {}
+        IllegalInstruction(const Instruction *i)
+            : InterpreterException(i, "illegal instruction") {}
 };
 
 class ProgramCounterOutOfRange : public InterpreterException {
     public:
-        ProgramCounterOutOfRange() : InterpreterException(nullptr) {}
+        ProgramCounterOutOfRange()
+            : InterpreterException(nullptr, "program counter out of range") {}
 };
 
 class MemoryAccessOutOfRange : public InterpreterException {
     public:
-        MemoryAccessOutOfRange(const Instruction *i) : InterpreterException(i) {}
+        MemoryAccessOutOfRange(const Instruction *i)
+            : InterpreterException(i, "memory access out of range") {}
 };
 
 class MisalignedProgram : public InterpreterException {
     public:
-        MisalignedProgram() : InterpreterException(nullptr) {}
+        MisalignedProgram()
+            : InterpreterException(nullptr, "misaligned program") {}
 };
 
 static const unsigned int SCRATCH_REGISTERS = 16;
