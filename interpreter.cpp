@@ -74,7 +74,7 @@ enum : uint16_t {
 
 };
 
-#define INSTRUCTION_SIZE 64
+#define INSTRUCTION_SIZE 8
 
 class Instruction {
     public:
