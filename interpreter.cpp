@@ -520,8 +520,9 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    if (packet.size() % INSTRUCTION_SIZE != 0) {
-        std::cerr << data << " is not instruction-aligned" << std::endl;
+    if (program.size() % INSTRUCTION_SIZE != 0) {
+        std::cerr << input << " is not instruction-aligned (" << program.size()
+            << " bytes)" << std::endl;
         return -1;
     }
 
