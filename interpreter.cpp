@@ -121,7 +121,89 @@ class MisalignedProgram : public InterpreterException {
             : InterpreterException(nullptr, "misaligned program") {}
 };
 
+class UndefinedRead : public InterpreterException {
+    public:
+        UndefinedRead(const Instruction *i)
+            : InterpreterException(i, "undefined read") {}
+};
+
 static const unsigned int SCRATCH_REGISTERS = 16;
+
+class Register {
+    public:
+        Register() : written(false) {}
+
+        Register &operator= (const uint32_t &x) {
+            value = x;
+            written = true;
+            return *this;
+        }
+
+        Register &operator+= (const uint32_t &x) {
+            if (!written)
+                throw UndefinedRead(nullptr);
+            value += x;
+            return *this;
+        }
+
+        Register &operator-= (const uint32_t &x) {
+            if (!written)
+                throw UndefinedRead(nullptr);
+            value -= x;
+            return *this;
+        }
+
+        Register &operator*= (const uint32_t &x) {
+            if (!written)
+                throw UndefinedRead(nullptr);
+            value *= x;
+            return *this;
+        }
+
+        Register &operator/= (const uint32_t &x) {
+            if (!written)
+                throw UndefinedRead(nullptr);
+            value /= x;
+            return *this;
+        }
+
+        Register &operator&= (const uint32_t &x) {
+            if (!written)
+                throw UndefinedRead(nullptr);
+            value &= x;
+            return *this;
+        }
+
+        Register &operator|= (const uint32_t &x) {
+            if (!written)
+                throw UndefinedRead(nullptr);
+            value |= x;
+            return *this;
+        }
+
+        Register &operator<<= (const uint32_t &x) {
+            if (!written)
+                throw UndefinedRead(nullptr);
+            value <<= x;
+            return *this;
+        }
+
+        Register &operator>>= (const uint32_t &x) {
+            if (!written)
+                throw UndefinedRead(nullptr);
+            value >>= x;
+            return *this;
+        }
+
+        operator uint32_t() const {
+            if (!written)
+                throw UndefinedRead(nullptr);
+            return value;
+        }
+    private:
+        uint32_t value;
+        bool written;
+};
 
 class Machine {
     public:
@@ -137,9 +219,9 @@ class Machine {
 
         /* Internal VM state */
         unsigned int pc;
-        uint32_t A;
-        uint32_t X;
-        uint32_t M[SCRATCH_REGISTERS];
+        Register A;
+        Register X;
+        Register M[SCRATCH_REGISTERS];
 
         /* Inputs */
         const uint8_t *P;
