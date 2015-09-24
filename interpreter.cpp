@@ -209,8 +209,8 @@ class Machine {
     public:
 
         Machine() : pc(0), len(0) {}
-        void load(const std::vector<uint8_t> packet);
-        void run(const std::vector<uint8_t> program);
+        void load(const std::vector<char> packet);
+        void run(const std::vector<char> program);
 
         /* Outputs */
         uint32_t ret;
@@ -228,11 +228,11 @@ class Machine {
         unsigned int len;
 
         bool apply(const Instruction &i);
-        Instruction decode(const uint8_t *data);
+        Instruction decode(const char *data);
 };
 
-void Machine::load(const std::vector<uint8_t> packet) {
-    P = packet.data();
+void Machine::load(const std::vector<char> packet) {
+    P = (uint8_t*)packet.data();
     len = packet.size();
 }
 
@@ -510,7 +510,7 @@ bool Machine::apply(const Instruction &i) {
     return false;
 }
 
-Instruction Machine::decode(const uint8_t *data) {
+Instruction Machine::decode(const char *data) {
     Instruction i;
     i.opcode = static_cast<uint16_t>(data[0]) | (static_cast<uint16_t>(data[1]) << 8);
     i.jt = data[2];
@@ -522,7 +522,7 @@ Instruction Machine::decode(const uint8_t *data) {
     return i;
 }
 
-void Machine::run(const std::vector<uint8_t> program) {
+void Machine::run(const std::vector<char> program) {
 
     if (program.size() % INSTRUCTION_SIZE != 0) 
         throw MisalignedProgram();
@@ -537,14 +537,13 @@ void Machine::run(const std::vector<uint8_t> program) {
     } while (!apply(i));
 }
 
-std::vector<uint8_t> read_file(const char *filename) {
+std::vector<char> read_file(const char *filename) {
     std::ifstream s(filename, std::ios::in|std::ios::binary);
     if (!s.is_open())
         throw std::runtime_error("failed to open file");
 
-    std::vector<uint8_t> data;
-    std::copy(std::istream_iterator<uint8_t>(s),
-        std::istream_iterator<uint8_t>(), std::back_inserter(data));
+    std::vector<char> data((std::istreambuf_iterator<char>(s)),
+        (std::istreambuf_iterator<char>()));
     
     return data;
 }
@@ -586,7 +585,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    std::vector<uint8_t> program;
+    std::vector<char> program;
     try {
         program = read_file(input);
     } catch (std::runtime_error e) {
@@ -594,7 +593,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    std::vector<uint8_t> packet;
+    std::vector<char> packet;
     try {
         packet = read_file(data);
     } catch (std::runtime_error e) {
