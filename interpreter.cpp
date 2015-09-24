@@ -610,5 +610,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    std::cout << "result: " << m.ret << std::endl;
+
     return 0;
 }
